@@ -1,0 +1,457 @@
+\documentclass[11pt]{article}
+
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\topmargin}{0.0in}
+\setlength{\headheight}{0in}
+\setlength{\headsep}{0.5in}
+\setlength{\textwidth}{6.5in}
+\setlength{\textheight}{8.5in}
+\setlength{\parindent}{0in}
+\setlength{\parskip}{0.12in}
+
+\usepackage{psfig}
+\usepackage{fancyheadings}
+
+\usepackage{fancyvrb}
+\usepackage{relsize}
+
+\usepackage{hyperref}
+
+\begin{document}
+
+\title{Probability \underline{Modeling}}
+
+\author{Norman Matloff}
+
+\date{October 19, 2004 \\
+  \copyright{} 2004-2006, Norman S. Matloff}
+
+\maketitle   
+
+\tableofcontents
+
+\newpage  
+
+\section{Goals}
+
+The word {\it modeling} is emphasized in the title of this document.
+The point is that although the probability course you took as an
+undergraduate may have done a good job of teaching the mechanics of
+probability theory, our goal in this course is to focus on how to
+\underline{use} that theory to model real problems.  Good modeling of
+computer systems is an art, not a science, and our goal will be to
+develop that art.  We will definitely discuss the mechanics as well,
+reviewing what you learned before\footnote{This review will not be
+formal, though.  It will come incidentally at various points in our
+presentations and discussions.} and then going on to various
+probabilistic analysis tools which will be new to you.  But we always
+return to the questions of what makes a good model, what intuitive
+meanings the probabilistic constructs have, and so on.
+
+\section{Running Example}
+
+This unit here will serve as a brief introduction to these issues.  As
+our running example, consider a communications channel shared by two
+parties, A and B.\footnote{Those who have studied computer networks will
+find the phrasing here familiar, though the details of the model will be
+new.  But we will not assume in the course that you have any background
+in networks.  Also, note that we will use examples from a variety of
+settings arising in computer science.} A is talking with C, and B is
+sending data to D, but C and D won't play much of a role here.  We are
+interested in the sounds that A makes in talking to C, for instance, but
+not the sounds C makes in talking to A.  Let's suppose, say, that C's
+and D's communcations go to A and B on a separate channel, e.g. a
+different frequency.
+
+A's sounds are digitized and put in a packet of bits, with a proper
+destination address, e.g. so that A's sounds will be picked up by C and
+not D.  Let's say the packets are of fixed size, whether voice or data.
+Let's further assume that time is {\it slotted}, meaning that time is
+divided into fixed-size slots, each capable of holding one packet.  If
+it helps you to think in concrete terms, assume that each slot is 6
+milliseconds long.\footnote{This is the {\it cell} size in ATM networks,
+for instance.}
+
+A and B will sometimes have something to send, and sometimes be silent.
+If a party has something to send during a particular time slot, she will
+send along the channel during that slot.  If both parties try to send
+during the same time slot, though, we will assume that a mechanism
+exists to make A {\it back off}, i.e. refrain from sending.  That packet
+of A's will be lost.
+
+An occasional loss of a voice packet is tolerable.  Loss of 6
+milliseconds' worth of sound won't adversely impact C's ability to
+understand what A is saying.  But when the percentage of lost packets
+becomes substantial, the perceived quality of the phone service will
+begin to drop noticeably.  So, one focus of our modeling and analysis
+will be on $\mu$, the long-run proportion of slots resulting in lost
+packets.\footnote{We will use the term ``long-run'' quite a bit.  In
+some cases, we will formalize this mathematically with limit notation
+like $\lim_{n \to \infty}$.  It's probably been a long time since you've
+worked with that kind of notation, but don't worry; it's simply a formal
+mathematical way of saying ``long-run.''  
+
+For instance, suppose we toss a fair coin repeatedly.  Let $C_n$ denote
+the number of heads out of the first n tosses.  Then the mathematical
+way of saying that the long-run proportion of heads is 0.5 is
+
+$$
+\lim_{n \to \infty} \frac{C_n}{n} = 0.5
+$$
+}  
+
+A one-slot gap might be tolerable, but maybe a two-slot gap could cause
+a problem.  So, let's also compute $\nu$, the long-run proportion of
+pairs of consecutive slots in which packets are lost.\footnote{Obviously
+we'd be interested in the general measure, based on sets of k
+consecutive slots, but let's keep things simple here.}
+
+\section{Tradeoffs in the Modeling Process}
+
+What we will do now is begin to formulate and analyze a series of models
+of this system.  What you will observe is that each model will be more
+realistic than the last, with richer structure and more complex
+assumptions, but also more difficult to analyze mathematically.  This is
+the usual pattern in modeling of computer systems.  Eventually the
+problem becomes mathematically intractable, at which point one resorts
+to computer simulation for analysis.  
+
+The reason I say that modeling is an ``art'' is that the challenge is to
+formulate a model which is simple enough to analyze mathematically but
+realistic enough so that some insight can be gained from it.  The model
+does not have to capture all aspects of our system; sometimes analyzing
+just a piece of the system is worthwhile.  
+
+Or, we may have several different ways to build the system under study,
+e.g. several different communication protocols, several different disk
+scheduling policies, etc.  We may be able to formulate a mathematical
+model in which we compare the several different approaches in a somewhat
+idealized setting.  If we find that one approach works better than the
+others in this setting, we might surmise that it works better in more
+realistic settings too, and maybe check via simulation. 
+
+We can always turn to simulation for the most complex/realistic models,
+but a good mathematical analysis can tell things a simulation cannot.
+For example, later we will study the famous M/G/1 queueing system, and
+find that the mathematical analysis reveals an important relationship
+between mean wait time and variance of service time, a pattern which
+might not emerge in simulation analysis.\footnote{We might not even
+think to investigate this aspect in the first place.}
+
+So, let's begin modeling the communications system described earlier.
+
+\subsection{Model I}
+
+Here we assume that A and B act independently of each other.  We also
+assume that for a given party, different time slots are independent.
+Let's formalize that:
+
+Let $X_n$ be 1 or 0, according to whether A has something to send or not
+in the $n^{th}$ time slot,  n = 1,2,3,...  Define $Y_n$ similarly for B.
+Then our informal assumptions above can be stated more precisely as
+saying that $X_1, X_2, X_3, ...$ are independent random variables, $Y_1,
+Y_2, Y_3, ...$ are independent random variables, and that the $X_i$ are
+independent of the $Y_j$.
+
+Say in each time slot, A has probability p of having something to send,
+with a corresponding probability q for B.  Intuitively,
+
+\begin{equation}
+\label{firstmu}
+\mu = P(X_n = Y_n = 1) = P(X_n = 1) P(Y_n = 1) = pq
+\end{equation}
+
+with the second equality coming from the independence of A and
+B.\footnote{Note that we have just implicitly reviewed a fundamental
+concept from your undergraduate probability course.  A lot of our review
+will be implicit.
+
+Also, not that ours is not a proof-oriented course, so our intuition is
+good enough here.  Indeed, a major goal will be to develop good
+intuition.  However, a proof is presented in Appendix \ref{slln}.}
+
+That was easy enough.  Now what about $\nu$?  Again, this is
+straightforward:
+
+\begin{equation}
+\nu = P(X_{n-1} = Y_{n-1} = X_n = Y_n = 1) = p^2 q^2
+\end{equation}
+
+Note carefully that here we used both the independence of A and B and
+the independence of time slots within each party.
+
+The quantities p and q are called {\it parameters} of the model.  This
+means they are quantities we can vary, to study how the system works
+over a range of settings.
+
+\subsection{Model II}
+
+The primary problem with Model I is that it assumes that for a given
+party, successive time slots are independent.  This clearly is
+unrealistic.  If a party attempts to send in one time slot, he probably
+will attempt to send in the next time slot too; voice communications
+usually use a number of consecutive packets---after all, what word lasts
+only 6 milliseconds?---and data traffic tends to be bursty too.  
+
+Let's generalize to a more complex model to reflect this.  If you look
+at our sentence above, ``If a party attempts to send in one time slot,
+he probably will attempt to send in the next time slot too,'' you can
+see that the specification of our new model will deal with
+\underline{conditional} probabilities.  We'll assume that
+
+\begin{equation}
+\label{pq}
+P(X_n = 1 | X_{n-1} = k) = 
+\cases{
+   p, & if $k = 1$\cr
+   q, & if $k = 0$\cr
+}
+\end{equation}
+
+The model has a similar equation, with parameters r and s, for party
+B.\footnote{In order to avoid running out of letters, I'm reusing `p'
+and `q' here.  They have nothing to do with the parameters p and q in
+Model I.} In words, if A is talking in this time slot, the probability
+of A's talking in the next slot is p, while if A is not talking in this
+slot, the chance of A's talking in the next slot is q.  We needed to
+make some kind of non-independent model, and this one is not a bad
+start.  Note that p would definitely be greater than 0.5, maybe 0.8 or
+so, while q would probably be considerably smaller.
+
+You may have noticed that I did {\it not} define another parameter, say
+
+$$
+w = P(X_n = 1)
+$$
+
+The reason is that p and q will determine the value of $P(X_n = 1)$, as
+we'll see below.  Adding a parameter w would overdetermine the
+model---another common pitfall in the modeling process.
+
+Well, then, let's find $\mu$ and $\nu$---if we can.  We're only on our
+second model, but the math is going to get harder, and one never knows at
+the outset just how hard it will be.
+
+Let's start with finding $\lim_{n \to \infty} P(X_n = 1)$:\footnote{By
+the way, be sure to note the ``break big events down into small events''
+approach in the following equations, which is so typical in
+probabilistic analyses.  We take the event in question here, $X_n = 1$,
+and ask ``How can that happen?'' That leads to some {\it and}s and {\it
+or}s which connect some smaller events which are easier to find
+probabilities for.}
+
+\begin{eqnarray}
+\lim_{n \to \infty} P(X_n = 1) &=& 
+\lim_{n \to \infty} P(X_{n-1} = 1 ~{\rm and}~ X_n = 1 ~{\rm or}~ X_{n-1} = 0 ~{\rm and}~ X_n = 1) \nonumber \\
+&=& \lim_{n \to \infty} P(X_{n-1} = 1 ~{\rm and}~ X_n = 1) + P(X_{n-1} = 0 ~{\rm and}~ X_n = 1) \nonumber \\
+&=& \lim_{n \to \infty} P(X_{n-1} = 1) P(X_n = 1 | X_{n-1} = 1)  +
+\lim_{n \to \infty} P(X_{n-1} = 0) P(X_n = 1 | X_{n-1} = 0) \nonumber \\
+&=& p \lim_{n \to \infty} P(X_{n-1} = 1) +
+q \lim_{n \to \infty} P(X_{n-1} = 0) 
+\end{eqnarray}
+
+So, if we let $x = \lim_{n \to \infty} P(X_n = 1)$, we have
+
+$$
+x = px + q (1-x)
+$$
+
+so that 
+
+$$
+\lim_{n \to \infty} P(X_n = 1) = \frac{q}{1-(p-q)}
+$$
+
+A similar analysis can be done for B.  Then, since A and B are still
+assumed independent, we have that
+
+\begin{eqnarray}
+\mu &=& \lim_{n \to \infty} P(X_n = Y_n = 1) \\
+&=& \lim_{n \to \infty} P(X_n = 1) \lim_{n \to \infty} P(Y_n = 1) \\
+&=& \frac{q}{1-(p-q)} \frac{s}{1-(r-s)}
+\end{eqnarray}
+
+\subsection{Model III}
+
+In our first two models, we were concerned solely with how to model the
+behavior of our system.  Now, let's add a little more realism by making
+a policy change.  Specifically, instead of giving data communications
+priority over voice, let us have B back off when A has something
+to send, with B postponing sending its data.
+
+The rationale for this is that data has exactly the opposite
+requirements as voice:  We can lose an occasional voice packet, but we
+cannot tolerate delay in voice; data can tolerate delay but not
+loss.\footnote{Say for instance you are transmitting an executable
+machine language file.  Even the loss of a single byte could render the
+program unrunnable.}  So, instead of giving data priority, as we did
+above, let's give voice priority and literally put the data ``on hold.''
+
+Note that the parameters r and s now have slightly different meanings
+from before, now being confined to situations in which B does not
+already have data ``on hold.''  In other words, if B sent data in the
+last time slot, the probability that it will have new data to send in
+the current slot is r; if B did not have data to send in the last slot,
+the probability is s that it will have data to send during this slot.
+If on the other hand B did have data to send in the last slot but had to
+back off, it will still have that same data which it will attempt to
+send during this slot.
+
+Accordingly, let's also change the definition of $Y_n$, to be 0 if B has
+nothing to send, 1 if B has something new to send, and 2 if B has
+something held over to send. 
+
+One quantity of interest here, which we will call $\eta$, would be the
+proportion of attempts by B to send which are thwarted by A.  Note that
+this is a conditional probability:
+
+$$
+\eta = \lim_{{n} \rightarrow \infty} P(X_n = 1 | Y_n > 0)
+$$
+
+At first, this seems to be about the same level of mathematical
+tractability of the previous models.  But wait!  A mathematical
+difficulty has snuck in without our realizing it---$X_n$ and $Y_n$ are
+no longer independent.  To see this, note first that if for instance A
+had something to send in time slot n-1, and B did too, then B would have
+had to back off, and B would thus have the held-over data for attempted
+transmission during slot n.  Thus $X_{n-1}$ and $Y_n$ are not
+independent, and since $X_{n-1}$ and $X_n$ are not independent, we see
+that $X_n$ and $Y_n$ are not independent either.
+
+As a result, the level of mathematical tractability has suddenly escalated
+significantly.  For example, in order to evaluate $\eta$, we would first
+find $P(Y_n > 0)$.  Following our previous lines of attack, we might
+write
+
+\begin{eqnarray}
+\lim_{{n} \rightarrow \infty} P(Y_n > 0) &=& 
+\lim_{{n} \rightarrow \infty} \left [ 
+P(X_{n-1} = 1) P(Y_n > 0 | X_{n-1} = 1) +
+P(X_{n-1} = 0) P(Y_n > 0 | X_{n-1} = 0) \right ] \nonumber \\ 
+&=& \frac{q}{1-(p-q)} \lim_{{n} \rightarrow \infty} P(Y_n > 0 | X_{n-1} = 1) +
+\left [1 - \frac{q}{1-(p-q)} \right ]  
+\lim_{{n} \rightarrow \infty}
+P(Y_n > 0 | X_{n-1} = 0) \nonumber  
+\end{eqnarray}
+
+At first, that second term seems tractable:  If $X_{n-1} = 0$, then any
+held-over data that B had had during slot n-1 was sent, so there is
+nothing held over in slot n.  But that reasoning is still not enough to
+find $P(Y_n > 0 | X_{n-1} = 0)$; we must take into account $Y_{n-1}$.
+For example, 
+
+$$
+P(Y_n > 0 | X_{n-1} = 0, Y_{n-1} > 0) = r
+$$
+
+but
+
+$$
+P(Y_n > 0 | X_{n-1} = 0, Y_{n-1} = 0) = s
+$$
+
+In other words, instead of conditioning only on $X_{n-1}$, we need to
+condition on both $X_{n-1}$ and $Y_{n-1}$.  With some patience, we can
+pursue this, derive some linear equations and solve them.  But you can
+see that this innocent-looking model actually is difficult to analyze.
+
+Later, we will learn a technique called {\it Markov chain analysis},
+which will make it much easier to solve for $\eta$ and other aspects of
+Model III, but even that technique won't solve all problems.  Basically
+the main thing the Markov model does for us is to organize and somewhat
+automate setting up the necessary linear equations.  This becomes a
+problem in the case of models which have infinitely many equations (such
+as those with queues), as you'll find when we study Markov chains.
+
+\section{Model Assessment}
+
+As mentioned earlier, even a model which is only partially realistic can
+yield valuable insights.  But in many cases we actually have real data
+for the system we are modeling, and it would be nice to use that data to
+do some sort of validation of our model.  We will look into this in more
+detail later, but here in this introduction, let's at least touch on
+what the issues are.
+
+For example, consider the assumption in Equation (\ref{pq}).  It
+basically is saying that the dependence in time of A's actions go back
+only one step.  A more general model might be two-step dependence,
+involving probabilities of $X_n$ given $X_{n-1}$ and $X_{n-2}$.  The
+assumption (\ref{pq}) is really the same as saying that for any fixed
+value of u = 0,1, 
+
+\begin{equation}
+\label{onestep}
+P(X_n = 1 | X_{n-1} = u, X_{n-2} = 0) =
+P(X_n = 1 | X_{n-1} = u, X_{n-2} = 1) 
+\end{equation}
+
+Now, suppose we do have real data from this system, $X_1,...,X_k$.  How
+can we use it to assess the validity of Equation (\ref{onestep})?
+Basically the approach is to estimate both sides of (\ref{onestep}) from
+the data.  For example, for the case u = 1 we would estimate the right
+side as
+
+\begin{equation}
+\label{est1}
+\frac
+{\sum_{n=3}^{k} X_n X_{n-1} X_{n-2}}
+{\sum_{n=3}^{k} X_{n-1} X_{n-2}}
+\end{equation}
+
+Here is why this works.  The denominator of (\ref{est1}) is a count of
+the number of instances in which $X_{n-1} = X_{n-2} = 1$, for n =
+3,4,...,k.  The numerator is the analogous count of $X_n = X_{n-1} =
+X_{n-2} = 1$.  The quotient is thus the proportion of the time that
+$X_n = 1$, among those times that $X_{n-1} = X_{n-2} = 1$.  The long-run
+limit of this quotient is $P(X_n = 1 | X_{n-1} = 1, X_{n-2} = 1)$.
+
+In the case of u = 0, the corresponding estimate is 
+
+\begin{equation}
+\label{est0}
+\frac
+{\sum_{n=3}^{k} X_n (1-X_{n-1}) X_{n-2}}
+{\sum_{n=3}^{k} (1-X_{n-1}) X_{n-2}}
+\end{equation}
+
+But then another question arises:  These are just estimates, based on
+observation of the system during k-2 time slots.  Are these estimates
+accurate enough?  Here the nature of questions changes from
+probabilistic to statistical.  This will be examined in a unit later in
+the course.
+
+\appendix
+
+\section{Proof of Equation (\ref{firstmu})}
+\label{slln}  
+
+We had defined $\mu$ to be the long-run proportion of slots resulting in
+lost packets, i.e.
+
+$$
+\mu = \lim_{n \to \infty} \frac{X_1 Y_1 + ... + X_n Y_n}{n}
+$$
+
+(note that $X_n = Y_n = 1$ if and only if $X_n Y_n = 1$).  
+
+By a theorem known as the Strong Law of Large Numbers,  
+
+$$
+\lim_{n \to \infty} \frac{X_1 Y_1 + ... + X_n Y_n}{n} = E(XY)
+$$
+
+where X and Y are generic random variables having the same distribution
+as the $X_i$ and $Y_i$.  Since X and Y are independent random variables,
+E(XY) = EX EY.  
+
+$$
+EX = 0 \cdot P(X = 0) + 1 \cdot P(X = 1) = p
+$$
+
+and EY = q.
+
+Putting all this together, we get $\mu = pq$.
+
+\end{document}

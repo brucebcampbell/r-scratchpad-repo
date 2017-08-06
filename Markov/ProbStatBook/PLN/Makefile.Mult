@@ -1,0 +1,4 @@
+
+MultVarDistr.pdf:  MultVarDistr.tex
+	pdflatex MultVarDistr.tex
+

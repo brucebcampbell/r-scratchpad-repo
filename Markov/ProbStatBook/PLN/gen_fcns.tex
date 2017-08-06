@@ -1,0 +1,122 @@
+\documentclass[11pt]{article}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{color}
+\usepackage{rotating}
+\usepackage{multirow}
+\usepackage{setspace}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{hyperref}
+
+\setlength{\textwidth}{7.00in}
+\setlength{\textheight}{9.00in}
+\voffset=-1.00in
+\hoffset=-1.00in
+ \renewcommand{\baselinestretch}{1.0}
+\singlespacing
+\begin{document}
+
+\begin{center}
+{\LARGE \bf Introduction to Generating Functions for Probabililty} \\
+\end{center}
+
+Generating functions are a transform which can be applied to any sequence of numbers. The sequence is indexed by natural numbers. Thus generating functions inherently have a discrete domain. The \href{http://en.wikipedia.org/wiki/Generating_function}{Wikipedia article} has a fair amount of information pertaining to the various uses of generating functions, these notes are limited to some rudimentary uses in probabillity theory.
+
+We begin by stating the general form for any generating function:
+\begin{align}
+G_X(s) &= \mathbb{E}(s^X) = \sum_{n=0}^{\infty} s^n\, \mathbb{P}(X=n) 
+\end{align}
+It should be clear from this that with sufficient algebra we can produce the generating function for any known distribution. To demonstrate this we compute the generating functions for a number of common distributions below:
+\section{Generating Functions for a few Distributions}
+{\bf Bernoulli}
+
+A Bernoulli random variable with $\mathbb{P}(X=1) = p$ and $\mathbb{P}(X=0) = 1 - p = q$
+\begin{align}
+G_X(s) &= \mathbb{E}(s^X) \\
+&= \sum_{n=0}^{\infty} s^n\, \mathbb{P}(X=n) \\
+&= s^0\,\mathbb{P}(X=0) + s^1\,\mathbb{P}(X=1) \\
+&= 1 \cdot q + s \cdot p \\
+&= sp + q
+\end{align}
+
+{\bf Geometric}
+
+A geometrically distributed random variable with parameter $q$, such that $\mathbb{P}(X=n) = q^n(1-q)$ for $n=0,1,2,...$
+
+\begin{align}
+G_X(s) &= \mathbb{E}(s^X) \\
+&= \sum_{n=0}^{\infty} s^n\, \mathbb{P}(X=n) \\
+&= \sum_{n=0}^{\infty} s^n\, q^n(1-q) \\
+&= (1-q)\,\sum_{n=0}^{\infty} (sq)^n \\
+&= (1-q)\,\frac{1}{1-sq}
+\end{align}
+
+{\bf Poisson}
+
+A Poisson distributed random variable with parameter $\lambda$ recall, a Poisson random variable has a PDF $\mathbb{P}(X=n) = e^{-\lambda}\frac{\lambda^n}{n!}$
+\begin{align}
+G_X(s) &= \mathbb{E}(s^X) \\
+&= \sum_{n=0}^{\infty} s^n\, \mathbb{P}(X=n) \\
+&= \sum_{n=0}^{\infty} s^n\, e^{-\lambda}\frac{\lambda^n}{n!} \\ 
+&= e^{-\lambda} \sum_{n=0}^{\infty} s^n\, \frac{\lambda^n}{n!} \\ 
+&= e^{-\lambda} \sum_{n=0}^{\infty} \frac{(\lambda s)^n}{n!} \\
+&= e^{-\lambda} e^{\lambda s} & \text{Maclaurin series}\\
+&= e^{\lambda(s - 1)}
+\end{align}
+
+\section{A few Properties of Generating Functions}
+
+In this section we prove a few useful properties of generating functions.
+
+First we prove that $\mathbb{E}(X) = {G'}_{X}(1)$
+
+\begin{align}
+G_X(s) &= \sum_{n=0}^{\infty} s^n\, \mathbb{P}(X=n) \\
+{G'}_X(s) &=  \frac{d}{ds} \sum_{n=0}^{\infty} s^n\, \mathbb{P}(X=n) \\
+&= \sum_{n=0}^{\infty} n{s}^{n-1}\, \mathbb{P}(X=n) \\
+{G'}_X(1) &= \sum_{n=0}^{\infty} n {1}^{n-1}\, \mathbb{P}(X=n)
+\end{align}
+
+Assume $X$ and $Y$ are independent random variables, prove $G_{X+Y} = G_{X}G{Y}$
+\begin{align}
+G_{X+Y}(s) &= \mathbb{E}(s^{X+Y}) \\
+&= \mathbb{E}(s^X)\mathbb{E}(s^Y) \\
+&= G_X(s)G_Y(s)
+\end{align}
+
+Find the generating function for $S_n = X_1 + X_2 + ... +X_n$ where $X_i$, for $i = 1,2,3,...$ are iid Bernoulli random variables.
+
+\begin{align}
+G_{S_n} &= \mathbb{E}(s^{S_n}) \\
+&= \mathbb{E}(s^{X_1 + X_2 + ... + X_n}) \\
+&= \mathbb{E}(s^{X_1}) \mathbb{E}(s^{X_2}) \cdot \cdot \cdot \mathbb{E}(s^{X_n}) \\
+&= \mathbb{E}(s^X)^n
+&= (ps + q)^n & \text{the generating function for a Bernoulli random variable} 
+\end{align}
+
+Prove that if $X_1, X_2, ..., X_N$ are iid, and $N$ is independent of the $X_i$ with generating $G_N$, then $S_N = X_1 + X_2 + ... + X_N$ has a generating function $G_{S_N}(s) = G_N(G_X(s))$
+
+\begin{align}
+G_{S_N}(s) &= \mathbb{E}(s^{S_N}) \\
+&= \mathbb{E}(s^{X_1 + X_2 + ... + X_N}|N=n) \\
+&= \sum \mathbb{E}(s^{X_1}) \mathbb{E}(s^{X_2}) \cdot \cdot \cdot \mathbb{E}(s^{X_N}) \cdot \mathbb{P}(N=n) \\
+&= \sum G_X(s)^N \mathbb{P}(X=n) \\
+&= G_N(G_X(s))
+\end{align}
+
+\section{Redoing HW 2 Problem 5 with Generating Functions}
+
+Suppose the number $N$ of cars arriving during a given time period at a toll booth has a Poisson distribution with parameter $\lambda$. Each car has a probability $p$ of being in a car pool. Let $M$ be the number of car-pool cars that arrive in the given period. Show that $M$ also has a Poisson distribution, with parameter $p\lambda$. 
+
+First we need to note that what we are trying to do is prove that $G_M(s) = e^{\lambda p (s - 1)}$. Observe that what we did was show that we are trying to prove that $M$ has a generating function of Poisson form.
+
+\begin{align}
+G_M(s) &= G_N(G_X(s)) & \text{X is Bernoulli with probability p} \\
+&= \sum_{n} G_X(s)^n \mathbb{P}(N=n) \\
+&= \sum_n (q+ps)^n \mathbb{P}(N=n) \\
+&= G_N(q+ps) \\
+&= e^{-\lambda + \lambda(q+pq)} & \text{Poisson generating function} \\
+&= e^{\lambda p (s - 1)}
+\end{align}
+\end{document}

@@ -1,0 +1,4 @@
+
+Relations.pdf:  Relations.tex
+	pdflatex Relations.tex
+
