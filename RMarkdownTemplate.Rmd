@@ -1,0 +1,38 @@
+---
+title: "MarkdownTemplate"
+subtitle: "`r paste(system('git remote -v | grep origin | cut -d\' \' -f1 | head -n 1',intern=TRUE),system('git log -1 | grep commit',intern=TRUE),sep=', ')`"
+author: "Bruce B Campbell"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: pdf_document
+---
+s
+---
+```{r setup, include=FALSE}
+rm(list = ls())
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(dev = 'pdf')
+knitr::opts_chunk$set(cache=TRUE)
+knitr::opts_chunk$set(tidy=TRUE)
+knitr::opts_chunk$set(prompt=FALSE)
+knitr::opts_chunk$set(fig.height=5)
+knitr::opts_chunk$set(fig.width=7)
+knitr::opts_chunk$set(warning=FALSE)
+knitr::opts_chunk$set(message=TRUE)
+knitr::opts_knit$set(root.dir = "/.")
+```
+
+`r date()`
+
+
+## Install Package if Not Available  
+```{r}
+if(!require(faraway)){
+    install.packages("faraway")
+    library(faraway)
+}
+
+if(!require(HistData)){
+    install.packages("HistData")
+    library(HistData)
+}
+```
