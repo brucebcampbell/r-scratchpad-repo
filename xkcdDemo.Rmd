@@ -7,6 +7,14 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(dev = 'png')
+knitr::opts_chunk$set(cache=TRUE)
+knitr::opts_chunk$set(tidy=TRUE)
+knitr::opts_chunk$set(prompt=FALSE)
+knitr::opts_chunk$set(fig.height=5)
+knitr::opts_chunk$set(fig.width=7)
+knitr::opts_chunk$set(warning=FALSE)
+knitr::opts_chunk$set(message=TRUE)
 ```
 
 ## XKCD Demo
@@ -141,17 +149,17 @@ dataman1 <- data.frame( x= c(2008,2010), y=c(63000, 58850),
 p <- ggplot() + geom_smooth(mapping=aes(x=year, y =number), 
                             data =volunteers, method="loess") +
   xkcdaxis(xrange,yrange) +
-  ylab("Volunteers at Caritas Spain") +
+  ylab("DATA LAKE ") +
   xkcdman(mapping, dataman1) +
   annotate("text", x=2008.7, y = 63700, 
-           label = "We Need\nVolunteers!", family="xkcd" ) +
+           label = "Bruce We need\n more data !", family="xkcd" ) +
   annotate("text", x=2010.5, y = 60000, 
-           label = "Sure\nI can!", family="xkcd" ) +
+           label = "Geoff \n  we need better data !", family="xkcd" ) +
   xkcdline(aes(xbegin=xbegin,ybegin=ybegin,xend=xend,yend=yend),
            datalines, xjitteramount = 0.12) 
 p
 #ggsave() is the preferred function for saving a ggplot2 plot. For instance, the following
-ggsave("gr1.png", p)
+#ggsave("gr1.png", p)
 ```
 
 
