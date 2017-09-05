@@ -18,3 +18,8 @@ git add --all .
 git commit -m "%DATEANDTIME%"
 git push
 cd ../
+cd intro-statistical-learning 
+git add --all .
+git commit -m "%DATEANDTIME%"
+git push
+cd ../
