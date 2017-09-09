@@ -54,6 +54,9 @@ install.packages("car")
 install.packages("plyr")
 
 install.packages("ggplot2")
+install.packages("ggfortify") # for plotting regression diagnostics - NICE! - see https://cran.r-project.org/web/packages/ggfortify/vignettes/plot_lm.html
+install.packages("ggrepel") # Replel for text labels on plot  https://cran.r-project.org/web/packages/ggrepel/vignettes/ggrepel.html
+
 install.packages("reshape2")
 
 install.packages("pracma") #Functions from numerical analysis and linear algebra 
