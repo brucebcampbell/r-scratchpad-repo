@@ -31,13 +31,17 @@ install.packages("base64enc")
 
 install.packages("sparklyr")
 
+##Tidyverse
+install.packages("broom") # Tidy model display - usage tidy(lm.fit)
+
+
 #Markdown
 install.packages("knitr")
 install.packages("rmarkdown")
 install.packages("pander") #Nice Table ouput for Markdown
-
-#LaTex In Plots 
-install.packages('latex2exp')
+install.packages("printr") # Should print matrices as LaTeX tables automatically in markdown
+install.packages("stargazer")
+install.packages('latex2exp') #LaTex In Plots : usage TeX("$ \\beata $")
 
 ####Shiny Development
 install.packages("htmlwidgets")
@@ -45,7 +49,6 @@ install.packages("devtools")
 
 ###GGplot Solarized Themes
 install.packages('ggthemes', dependencies = TRUE)
-
 
 install.packages("formatR")
 
