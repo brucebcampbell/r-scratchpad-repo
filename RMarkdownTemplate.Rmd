@@ -41,3 +41,10 @@ if(!require(HistData)){
 }
 
 ```
+
+Hide output but keep plots
+```{r, echo=FALSE,results='hide',fig.keep='all'}
+#Might help - investigate
+invisible(  call r function here  )
+
+```
