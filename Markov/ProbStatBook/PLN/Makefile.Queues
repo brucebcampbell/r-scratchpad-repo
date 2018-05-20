@@ -1,5 +1,0 @@
-
-
-Queues.pdf:  Queues.tex
-	pdflatex Queues.tex
-

@@ -1,4 +1,0 @@
-
-DiscreteProb.pdf:  DiscreteProb.tex
-	pdflatex DiscreteProb.tex
-

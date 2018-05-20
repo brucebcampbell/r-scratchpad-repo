@@ -1,4 +1,0 @@
-
-Renewal.pdf:  Renewal.tex
-	pdflatex Renewal.tex
-

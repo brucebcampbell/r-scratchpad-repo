@@ -1,4 +1,0 @@
-
-Markov.pdf:  Markov.tex
-	pdflatex Markov.tex
-

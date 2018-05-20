@@ -1,4 +1,0 @@
-
-EstTest.pdf:  EstTest.tex
-	pdflatex EstTest.tex
-

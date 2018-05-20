@@ -1,4 +1,0 @@
-
-Queues.dvi:  Queues.tex
-	latex Queues.tex 
-
