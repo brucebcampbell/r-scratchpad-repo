@@ -42,12 +42,16 @@ dat$eij <- unlist(sapply(p, function(x) arima.sim(model=list(ar=ar.val), n=x) * 
 dat$yij <- (beta0 + rep(U[,1], times=p)) + (beta1 + rep(U[,2], times=p)) * log(dat$obs) + dat$eij
 plot(dat$id, pch='.')
 
+
 library(plyr)
 dat = ddply(dat, .(id), function(x){
   x$alpha = ifelse(runif(n = 1) > 0.9, 1, 0.1)
   x$grouper = factor(rbinom(n=1, size =3 ,prob=0.5), levels=0:3)
   x
 })
+
+
+#This is the spaghetti plot
 tspag = ggplot(dat, aes(x=obs, y=yij)) + 
   geom_line() + guides(colour=FALSE) + xlab("Observation Time Point") +
   ylab("Y")
