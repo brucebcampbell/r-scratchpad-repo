@@ -1,6 +1,6 @@
 ##Management of Data and Code for statistical analysis project
 
-The scale and goals of statistical projects are as varied as the data itself. They can range from answering a basic question from a small csv file to deployment of a robust classifier in a commercial distributed computing environment. 
+The scale and goals of statistical projects are as varied as the data itself. They can range from answering a basic question from a small csv file to deployment of a robust classifier in a commercial distributed computing environment.
 
 The two main things that need to be organized in a statistical analysis project are code and data.  These are commended on in the sections below.  A major concern is versioning of code and data so that results are reproducible. Generally data and results will not be kept in version control.  Reports go in a document store.  Code goes in source control.  Data lives in one or more data stores.  Reports code and data all need versions.
 
@@ -22,35 +22,35 @@ doAnalysis.R: Calls the functions defined in analyticFunctions.R to perform the 
 
 The main motivation for this set up is for working with large data whereby you don't want to have to reload the data each time you make a change to a subsequent step. Keeping  the code compartmentalized like this means you can come back to a long forgotten project and quickly read load.R and work out what data you need to update, and then look at do.R to work out what analysis was performed.
 
-When manipulating data frames - use variables and never indices.  In this way we are intentional with our data.  Columns come and go in the raw data so it's best to catch problems early. 
+When manipulating data frames - use variables and never indices.  In this way we are intentional with our data.  Columns come and go in the raw data so it's best to catch problems early.
 
 
 ##Management of Data for statistical analysis projects
 
-Keep raw data unaltered. 
+Keep raw data unaltered.
 
-Document data pedigree. 
+Document data pedigree.
 
-Document transformations and steps to clean data - both manual steps and steps implemented in code. 
+Document transformations and steps to clean data - both manual steps and steps implemented in code.
 
 ##Versioning
 
-As mentioned above - code data and reports all need versioning. Since reports depend on code and data, I generally use a report_verion=(data_version,code_version,date_of_report) scheme. 
+As mentioned above - code data and reports all need versioning. Since reports depend on code and data, I generally use a report_verion=(data_version,code_version,date_of_report) scheme.
 
 Reports and plots generally follow the same scheme.  Encoding of the version is done through the directory structure;
 
-data_version\report_version 
+data_version\report_version
 
 
 ## Examples
 
-In particular, as.numeric applied to a factor is meaningless, and may happen by implicit coercion. 
-To transform a factor f to approximately its original numeric values, as.numeric(levels(f))[f] is 
+In particular, as.numeric applied to a factor is meaningless, and may happen by implicit coercion.
+To transform a factor f to approximately its original numeric values, as.numeric(levels(f))[f] is
 recommended and slightly more efficient than  as.numeric(as.character(f)).
 
 On require versus library
-Both require() and library() can load (strictly speaking, attach) an R package. 
- library() loads a package, and require() tries to load  a package. 
+Both require() and library() can load (strictly speaking, attach) an R package.
+ library() loads a package, and require() tries to load  a package.
 
 ```{r}getwd() #Get working directory
 ls()
@@ -64,7 +64,7 @@ Clear all plots
 ```{r}
 dev.off(dev.list()["RStudioGD"])
 ```
-In RStudio, document output can be generated using knitr by clicking on the knit button. 
+In RStudio, document output can be generated using knitr by clicking on the knit button.
 You can also directly enter a command in the R command line. If you leave out the second argument, then the output
 specification in the markdown document determines the output format:
 rmarkdown::render("introduction.Rmd","pdf_document").
@@ -76,9 +76,9 @@ rmarkdown::render("introduction.Rmd","all")
 
 pch = "."
 
-The argument controlling the box around a graph is bty (i.e., box type). 
-To suppress the box entirely, issue the 
-par(bty="n") 
+The argument controlling the box around a graph is bty (i.e., box type).
+To suppress the box entirely, issue the
+par(bty="n")
 
 par(bty = "n")  
 stripchart(Volume, method = "jitter", pch = 20,   xlab = "Volume in cubic feet")
@@ -90,15 +90,40 @@ The mtext() command adds a note outside of the plotting area of the graph.
 mtext("Data source: Minitab Student Handbook",
 side = 1, line = 4, adj = 1, col = "dodgerblue4", cex = .7)
 ```
-Dotchart 
+Dotchart
 ```{r}
 dotchart(data2$X1, labels = row.names(data2),
     cex = .5, main = "X1 Chart Title",
     xlab = "X1 description")
 ```
 
-```{r}
+# Parallel with error handling 
 
+```{r}
+library(randomForest)
+library(foreach)
+
+
+x <- 1:100
+beta <- 1
+e <- rnorm(100)
+y <- beta * x + e
+plot(x, y)
+
+rf <- foreach(ntree=rep(250, 4), .combine=combine, .packages='randomForest') %dopar%
+{
+  result<-tryCatch(
+    {
+
+      randomForest(data.frame(x), y, ntree=ntree)
+    }, error=function(e){
+      class(e)<-class(simpleWarning(''))
+      warning(e)
+      NULL
+    }
+  )
+}
+```
 Many R functions recycle arguments. This means that if there are not enough items in a vector, for instance, R will reuse items. So, to make Figure 4-4, the argument col = c("darkblue","dodgerblue") applies to the 50 states. Because there are only two colors specified, when R needs to apply a color to the third state, it goes back to the first color, and so on until all the states have colors.
 
 
@@ -133,7 +158,7 @@ Wonderful Plot
 attach(Nimrod)
 # par() sets bkgrnd color, foreground color, axis color,
 # text size (cex), horiz.
-# text on y-axis (las=1), margins (mar). Graph too big for 
+# text on y-axis (las=1), margins (mar). Graph too big for
 # default margins. ?par for more info on above arguments.
 
 par(bg = "white", fg = "white",
@@ -144,8 +169,8 @@ par(bg = "white", fg = "white",
 # makes plot horizontal,
 # sets color for box border and box colors (col),
 # creates titles (main, xlab), creates names
-# for the combinations of level*medium (names), names size 
-# (cex.names). One of the names is "" because there is no 
+# for the combinations of level*medium (names), names size
+# (cex.names). One of the names is "" because there is no
 # category "amateur organ."
 
 boxplot(time ~ level * medium, horizontal = TRUE,
@@ -158,13 +183,13 @@ boxplot(time ~ level * medium, horizontal = TRUE,
   cex.names = .4)
 
 # abline() puts vert. line at time = 186 sec. to show the
-# performance conducted by Elgar. Line type (lty) dotted & color 
+# performance conducted by Elgar. Line type (lty) dotted & color
 # (col) black.
 
 abline(v = 186, lty = "dotted", col = "black")
 
 # legend() chooses legend text & color & location on the graph.
-# Legend shows that pros are peachpuff4 & amateurs are 
+# Legend shows that pros are peachpuff4 & amateurs are
 # deepskyblue.
 
 legend("right", title = "Level", title.col = "black",
@@ -177,7 +202,7 @@ mtext("  Elgar himself - - >", side = 3,
   line = -2, adj = 0,
   cex = .7, col = "black")
 
-# axis() modifies x-axis (1)  & sets the color & length and 
+# axis() modifies x-axis (1)  & sets the color & length and
 # tickmarks
 axis(1, col = "cadetblue", at = c(160,200,250,300))
 
@@ -192,7 +217,7 @@ hist(sbp, main = "sbp dataset", las = 1, label = T,
   col = "maroon", xlab = "Systolic blood pressure")
 ```
 
-Nice desnity   - 
+Nice desnity   -
 ```{r}
 smoothScatter(x,y)
 lines(lowess(x,y))
@@ -229,30 +254,30 @@ plot(rnorm(1000), seq(1, 1000, by = 1)
       , col = pal(1000)
       , xlab = "x"
       , ylab = "y"
-      , main = "Fun with rnorm + colorRampPalette (the blues)") 
+      , main = "Fun with rnorm + colorRampPalette (the blues)")
 ```
 
 
-Random Sample 
+Random Sample
 ```{r}
 dfSampled <- df[sample(1:nrows(df),sampleSize),]
 ```
 
-Mode of data 
+Mode of data
 ```{r}
 temp <-table(X1)
 names(temp)[temp==max(temp)]
 ```
 
 
-Plotting Contours 
+Plotting Contours
 ```{r}
 if(!require("mixtools")) { install.packages("mixtools");  require("mixtools") }
 data_f <- faithful
 plot(data_f$waiting, data_f$eruptions)
-data_f.k2 = mvnormalmixEM(as.matrix(data_f), k=2, maxit=100, epsilon=0.01) 
+data_f.k2 = mvnormalmixEM(as.matrix(data_f), k=2, maxit=100, epsilon=0.01)
 data_f.k2$mu # estimated mean coordinates for the 2 multivariate Gaussians
-data_f.k2$sigma # estimated covariance matrix 
+data_f.k2$sigma # estimated covariance matrix
 ```
 
 group data for coloring
@@ -266,22 +291,22 @@ for (i in 1: length(data_f.k2$mu))  ellipse(data_f.k2$mu[[i]],data_f.k2$sigma[[i
 
 # needs ggplot2 package
 require("ggplot2")
-# ellipsis data 
-ell <- cbind(data.frame(group=factor(rep(1:length(data_f.k2$mu), each=250))), 
-             do.call(rbind, mapply(ellipse, data_f.k2$mu, data_f.k2$sigma, 
+# ellipsis data
+ell <- cbind(data.frame(group=factor(rep(1:length(data_f.k2$mu), each=250))),
+             do.call(rbind, mapply(ellipse, data_f.k2$mu, data_f.k2$sigma,
                                    npoints=250, SIMPLIFY=FALSE)))
 
 # plotting command
-p <- ggplot(data_f, aes(color=group)) + 
+p <- ggplot(data_f, aes(color=group)) +
   geom_point(aes(waiting, eruptions)) +
   geom_path(data=ell, aes(x=`2`, y=`1`)) +
   theme_bw(base_size=16)
 print(p)
 ```
 
-How to convert datatypes in bulk 
+How to convert datatypes in bulk
 ```{r}instanceconvert <- colnames(df[1:10])
-df[,instanceconvert] <- 
+df[,instanceconvert] <-
   lapply(df[,instanceconvert,drop=FALSE],as.numeric)
 ```
 
@@ -318,28 +343,28 @@ The {installr} package offers a set of R functions for the installation and upda
 # installing/loading the package:
 if(!require(installr)) {
 install.packages("installr"); require(installr)} #load / install+load installr
- 
+
 # using the package:
 updateR()
 ```
 
-###Lattice Graphics are powerful methods of data visualization 
-One of the most powerful features of lattice graphs is the ability to add conditioning variables. 
- If one conditioning variable is present, a separate panel is created for each level. 
- If two conditioning variables are present, a separate panel is created for each combination of levels for 
+###Lattice Graphics are powerful methods of data visualization
+One of the most powerful features of lattice graphs is the ability to add conditioning variables.
+ If one conditioning variable is present, a separate panel is created for each level.
+ If two conditioning variables are present, a separate panel is created for each combination of levels for
  the two variables. It’s rarely useful to include more than two conditioning variables.
- Typically, conditioning variables are factors. But what if you want to condition on a continuous variable? 
- One approach would be to transform the continuous variable into a discrete variable using R’s cut() function. 
- Alternatively, the lattice package provides functions for transforming a continuous variable into a data structure 
- called a shingle. Specifically, the continuous variable is divided into a series of (possibly) overlapping ranges. 
+ Typically, conditioning variables are factors. But what if you want to condition on a continuous variable?
+ One approach would be to transform the continuous variable into a discrete variable using R’s cut() function.
+ Alternatively, the lattice package provides functions for transforming a continuous variable into a data structure
+ called a shingle. Specifically, the continuous variable is divided into a series of (possibly) overlapping ranges.
  For example, the function
  myshingle <- equal.count(x, number=n, overlap=proportion)
- takes continuous variable x and divides it into n intervals with proportion overlap and equal numbers of bservations 
- in each range, and returns it as the variable myshingle (of class shingle). Printing or plotting this object 
+ takes continuous variable x and divides it into n intervals with proportion overlap and equal numbers of bservations
+ in each range, and returns it as the variable myshingle (of class shingle). Printing or plotting this object
  (for example, plot(myshingle)) displays the shingle’s intervals.
- Once a continuous variable has been converted to a shingle, you can use it as a conditioning variable. 
+ Once a continuous variable has been converted to a shingle, you can use it as a conditioning variable.
 
-#------------------------------------Categorical Data 
+#------------------------------------Categorical Data
 # Discrete distributions
 # distplot Plots for discrete distributions
 # goodfit Goodness-of-fit for discrete distributions
@@ -366,7 +391,7 @@ One of the most powerful features of lattice graphs is the ability to add condit
 # mosaic3d 3D mosaic displays
 # glmlist Methods for working with lists of models
 
-Here's how to do error handling in ply functions 
+Here's how to do error handling in ply functions
 ```{r}
 calculatEntropy <- function(df) {
   result<-tryCatch(
@@ -382,7 +407,7 @@ calculatEntropy <- function(df) {
     result[2] <- SE
   }
     }, error=function(e){
-      class(e)<-class(simpleWarning('')) 
+      class(e)<-class(simpleWarning(''))
       warning(e)
       NULL
       })
@@ -403,12 +428,12 @@ https://cran.r-project.org/web/packages/data.table/index.html
 dataFilePath      = "E:/Analyses/Electric Meter Over-temperature/Data/121715/icon_voltage.csv"
 dataFrameHeaders  = c("repid", "timeofevent", "maximum_voltage")
 missingFlag         = "\\N"
-dataRaw = fread(dataFilePath, 
+dataRaw = fread(dataFilePath,
                  na.strings = missingFlag,
                  colClasses = dataFrameTypes)
 ```{r}
 
-Solarized GGplot 
+Solarized GGplot
 ```{r}
 library("ggplot2")
 library("ggthemes")
@@ -438,14 +463,14 @@ print(p5)
 GGally Scatterplot For Multiclass
 ```{r}
 # another option
-makePairs <- function(data) 
+makePairs <- function(data)
 {
   grid <- expand.grid(x = 1:ncol(data), y = 1:ncol(data))
   grid <- subset(grid, x != y)
   all <- do.call("rbind", lapply(1:nrow(grid), function(i) {
     xcol <- grid[i, "x"]
     ycol <- grid[i, "y"]
-    data.frame(xvar = names(data)[ycol], yvar = names(data)[xcol], 
+    data.frame(xvar = names(data)[ycol], yvar = names(data)[xcol],
                x = data[, xcol], y = data[, ycol], data)
   }))
   all$xvar <- factor(all$xvar, levels = names(data))
@@ -455,19 +480,19 @@ makePairs <- function(data)
   }))
   list(all=all, densities=densities)
 }
- 
+
 # expand iris data frame for pairs plot
 gg1 = makePairs(iris[,-5])
- 
+
 # new data frame mega iris
 mega_iris = data.frame(gg1$all, Species=rep(iris$Species, length=nrow(gg1$all)))
- 
+
 # pairs plot
-ggplot(mega_iris, aes_string(x = "x", y = "y")) + 
-  facet_grid(xvar ~ yvar, scales = "free") + 
-  geom_point(aes(colour=Species), na.rm = TRUE, alpha=0.8) + 
-  stat_density(aes(x = x, y = ..scaled.. * diff(range(x)) + min(x)), 
-               data = gg1$densities, position = "identity", 
+ggplot(mega_iris, aes_string(x = "x", y = "y")) +
+  facet_grid(xvar ~ yvar, scales = "free") +
+  geom_point(aes(colour=Species), na.rm = TRUE, alpha=0.8) +
+  stat_density(aes(x = x, y = ..scaled.. * diff(range(x)) + min(x)),
+               data = gg1$densities, position = "identity",
                colour = "grey20", geom = "line")
 ```
 
@@ -527,5 +552,3 @@ plot(si3, nmax = 80, cex.names = 0.5)
 si4 <- silhouette(cutree(ar, k = 2), daisy(ruspini))
 plot(si4, nmax = 80, cex.names = 0.5)
 ```
-
-
